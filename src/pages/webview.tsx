@@ -9,17 +9,20 @@ export const WebViewPage = () => {
   const handleNavigationStateChange = async (newNavState: any) => {
     const url = newNavState.url;
     if (url === 'https://leetcode.com/') {
-      CookieManager.getAll(true).then(res => {
-        AsyncStorage.setItem('@session_value', res.LEETCODE_SESSION.value);
-        AsyncStorage.setItem(
+      CookieManager.getAll(true).then(async res => {
+        await AsyncStorage.setItem(
+          '@session_value',
+          res.LEETCODE_SESSION.value,
+        );
+        await AsyncStorage.setItem(
           '@session_expiration',
           res.LEETCODE_SESSION.expires?.substring(0, 10) as string,
         );
-        AsyncStorage.setItem('@csrftoken', res.csrftoken.value);
-      });
-      CookieManager.clearAll(true);
+        await AsyncStorage.setItem('@csrftoken', res.csrftoken.value);
+        await CookieManager.clearAll(true);
 
-      navigator.navigate('main');
+        navigator.navigate('main');
+      });
     }
   };
   return (

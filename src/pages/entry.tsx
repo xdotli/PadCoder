@@ -3,28 +3,31 @@ import {useNavigation} from '@react-navigation/native';
 import {styled} from 'nativewind';
 import React, {useEffect} from 'react';
 import {Pressable, SafeAreaView, Text, View} from 'react-native';
-import {useRecoilState} from 'recoil';
-import {tokenState} from '../atoms';
+import {useSetRecoilState} from 'recoil';
+import {expireState, sessionState, tokenState} from '../atoms';
 import BookSvg from '../svg/book';
 import CodeSvg from '../svg/code';
 import EnvelopeSvg from '../svg/envelope';
-import {Token} from '../types/token';
 
 const StyledSafeArea = styled(SafeAreaView);
 
 export const EntryPage: React.FC = () => {
-  const [_, setToken] = useRecoilState(tokenState);
+  const setToken = useSetRecoilState(tokenState);
+  const setSession = useSetRecoilState(sessionState);
+  const setExpire = useSetRecoilState(expireState);
+
   const navigator: any = useNavigation();
   const getToken = async () => {
     try {
       const csrftoken = await AsyncStorage.getItem('@csrftoken');
       const expiration = await AsyncStorage.getItem('@session_expiration');
-      const session = await AsyncStorage.getItem('@session');
+      const session = await AsyncStorage.getItem('@session_value');
       if (csrftoken && expiration && session) {
-        setToken({session, expiration, csrftoken} as unknown as Token);
+        setToken(csrftoken);
+        setSession(session);
+        setExpire(expiration);
+        navigator.navigate('main');
       }
-
-      navigator.navigate('main');
     } catch (err) {
       console.log(err);
     }
