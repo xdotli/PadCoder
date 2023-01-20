@@ -1,10 +1,8 @@
 import {useNavigation} from '@react-navigation/native';
-import {styled} from 'nativewind';
 import React, {useState} from 'react';
 import {Pressable, SafeAreaView, Text, View} from 'react-native';
 import LCSvg from '../svg/lc';
 
-const StyledSafeArea = styled(SafeAreaView);
 export const LoginPage: React.FC = () => {
   const [isSelect, setIsSelect] = useState<Boolean>(false);
   const navigator: any = useNavigation();
@@ -12,7 +10,7 @@ export const LoginPage: React.FC = () => {
     navigator.navigate('webview');
   };
   return (
-    <StyledSafeArea className="h-screen w-screen bg-[#FFFDF3] dark:bg-[#27292E]">
+    <SafeAreaView className="h-screen w-screen bg-[#FFFDF3] dark:bg-[#27292E]">
       <View className="flex flex-col justify-between pl-[8.03vw] mt-[10.99vh] w-full h-[15.38vh]">
         <Text className="text-[4.762vw] font-bold leading-tight text-black dark:text-white">
           Let's set up.
@@ -50,6 +48,6 @@ export const LoginPage: React.FC = () => {
           </Text>
         </Pressable>
       )}
-    </StyledSafeArea>
+    </SafeAreaView>
   );
 };

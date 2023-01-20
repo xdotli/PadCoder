@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
-import {styled} from 'nativewind';
 import React, {useEffect} from 'react';
 import {Pressable, SafeAreaView, Text, View} from 'react-native';
 import ApiCaller from '../api/apicaller';
@@ -9,19 +8,18 @@ import BookSvg from '../svg/book';
 import CodeSvg from '../svg/code';
 import EnvelopeSvg from '../svg/envelope';
 
-const StyledSafeArea = styled(SafeAreaView);
-
 export const EntryPage: React.FC = () => {
   const navigator: any = useNavigation();
   const getToken = async () => {
     try {
       const csrftoken = await AsyncStorage.getItem('@csrftoken');
-      const lastLogin = await AsyncStorage.getItem('@last_login');
+      const lastLogin = (await AsyncStorage.getItem(
+        '@last_login',
+      )) as unknown as number;
       const session = await AsyncStorage.getItem('@session_value');
-
-      const expireDate = 14 * 24 * 60 * 60;
+      const expireDate = 14 * 24 * 60 * 60 * 1000;
       const now = new Date().getTime();
-      const isExpired = now - (Number(lastLogin) || now) >= expireDate;
+      const isExpired = now - (lastLogin || now) >= expireDate;
       if (csrftoken && !isExpired && session) {
         ApiCaller.getInstance().setCredential({
           session,
@@ -45,7 +43,7 @@ export const EntryPage: React.FC = () => {
   };
 
   return (
-    <StyledSafeArea className="h-screen w-screen bg-[#FFFDF3] dark:bg-[#27292E]">
+    <SafeAreaView className="h-screen w-screen bg-[#FFFDF3] dark:bg-[#27292E]">
       <Text className="pl-[9.38vw] pt-[10.52vh] text-[4.76vw] leading-tight font-bold text-black dark:text-white">
         Welcome to <Text className="text-[#FFAA44]">PadCoder.</Text>
       </Text>
@@ -74,6 +72,6 @@ export const EntryPage: React.FC = () => {
         onPress={() => handleGetStarted()}>
         <Text className="text-white text-2xl">Get Started</Text>
       </Pressable>
-    </StyledSafeArea>
+    </SafeAreaView>
   );
 };
