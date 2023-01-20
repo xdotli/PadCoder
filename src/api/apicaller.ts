@@ -90,7 +90,6 @@ class ApiCaller {
           content
           isPaidOnly
           difficulty
-          exampleTestcases
           topicTags {
             name
             slug
@@ -111,10 +110,26 @@ class ApiCaller {
     });
   }
 
+  async getTestCases(titleSlug: string): Promise<string> {
+    return await this.GraphQLRequest({
+      query: `
+      query consolePanelConfig($titleSlug: String!) {
+        question(titleSlug: $titleSlug) {
+          exampleTestcaseList
+        }
+      }      
+      `,
+      variables: {
+        titleSlug: titleSlug,
+      },
+    }).then(res => {
+      return res.exampleTestcaseList;
+    });
+  }
+
   async testSolution(
     slug: string,
     data_input: string,
-    judgeType: string,
     lang: string,
     question_id: string,
     typed_code: string,
@@ -124,12 +139,12 @@ class ApiCaller {
       url: `problems/${slug}/interpret_solution/`,
       body: {
         data_input: data_input,
-        judgeType: judgeType,
         lang: lang,
         question_id: question_id,
         typed_code: typed_code,
       },
     }).then(async res => {
+      console.log(res.data);
       return await this.HttpRequest({
         method: 'GET',
         url: `submissions/detail/${res.data.interpret_id}/check`,
@@ -164,16 +179,20 @@ class ApiCaller {
   }
 
   private async HttpRequest(options: HttpRequestOptions) {
+    console.log(
+      `LEETCODE_SESSION=${this.credential.session}; csrftoken=${this.credential.csrftoken}`,
+    );
     return axios.request({
       url: this.urls.base + options.url,
       method: options.method,
       headers: {
-        Cookie: `LEETCODE_SESSION=${
-          ApiCaller.getInstance().credential.session
-        };csrftoken=${ApiCaller.getInstance().credential.csrftoken}`,
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': this.credential.csrftoken,
-        Referer: options.referer || this.urls.base,
+        Cookie: `LEETCODE_SESSION=${this.credential.session};csrftoken=${this.credential.csrftoken}`,
+        'x-csrftoken': this.credential.csrftoken,
+        Origin: this.urls.base,
+        Referer: this.urls.base,
+        'Cache-Control': 'no-cache',
+        UserAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
       },
       data: JSON.stringify(options.body) || '',
     });
@@ -184,10 +203,9 @@ class ApiCaller {
       headers: {
         Origin: options.origin || this.urls.base,
         Referer: options.referer || this.urls.base,
-        LEETCODE_SESSION: this.credential.session,
-        csrftoken: this.credential.csrftoken,
-        'X-Requested-With': 'XMLHttpRequest',
+        Cookie: `LEETCODE_SESSION=${this.credential.session}; csrftoken=${this.credential.csrftoken}`,
         'X-CSRFToken': this.credential.csrftoken,
+        UserAgent: 'PostmanRuntime/7.30.0',
       },
     });
     return await client.request(options.query, options.variables || {});

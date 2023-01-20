@@ -42,7 +42,7 @@ interface ProblemDetail {
   title: string;
   titleSlug: string;
   content: string;
-  exampleTestCases: string;
+  exampleTestCaseList: string;
   codeSnippets: CodeSnippet[];
 }
 

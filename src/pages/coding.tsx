@@ -1,36 +1,150 @@
+import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {Text, View} from 'react-native';
+import {Pressable, Text, TextInput, View} from 'react-native';
 import ApiCaller from '../api/apicaller';
+import {ProblemDetail} from '../api/interfaces';
+import ACSvg from '../svg/ac';
+import RejSvg from '../svg/rej';
 
 export const CodingPage: React.FC = () => {
-  const [content, setContent] = useState({});
+  const navigator: any = useNavigation();
+  enum JudgeStatus {
+    NOTSUBMITTED,
+    AC,
+    REJ,
+  }
+  const [question, setQuestion] = useState<ProblemDetail>(
+    null as unknown as ProblemDetail,
+  );
+  const [code, setCode] = useState('');
+  const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
+  const [solutionAccepted, setSolutionAccepted] = useState(
+    JudgeStatus.NOTSUBMITTED,
+  );
+
+  const handleBack = () => {
+    navigator.navigate('main');
+  };
 
   const getQuestionDetail = async () => {
     const data = await ApiCaller.getInstance().getProblemDetail('two-sum');
 
     if (data) {
-      setContent(data);
-
+      setQuestion(data);
       for (const snippet of data.codeSnippets) {
         if (snippet.langSlug === 'python3') {
-          console.log(snippet.code);
+          setCode(snippet.code);
         }
       }
     }
   };
 
+  const handleTest = async () => {
+    // const testcases = await ApiCaller.getInstance().getTestCases(
+    //   question.titleSlug,
+    // );
+
+    // try {
+    //   const res = await ApiCaller.getInstance().testSolution(
+    //     question.titleSlug,
+    //     '',
+    //     'python3',
+    //     '1',
+    //     code,
+    //   );
+    // } catch (err) {
+    //   console.log(err);
+    // }
+    setSolutionAccepted(JudgeStatus.NOTSUBMITTED);
+    setTestAccepted(JudgeStatus.AC);
+  };
+
+  const handleSubmit = async () => {
+    // try {
+    //   const res = await ApiCaller.getInstance().submitSolution(
+    //     question.titleSlug,
+    //     'python3',
+    //     '1',
+    //     code,
+    //   );
+    // } catch (err) {
+    //   console.log(err);
+    // }
+    setTestAccepted(JudgeStatus.NOTSUBMITTED);
+    setSolutionAccepted(JudgeStatus.AC);
+  };
   useEffect(() => {
     getQuestionDetail();
   }, []);
 
   return (
     <View className="flex flex-row w-screen h-screen">
-      <View className="w-[507px] h-screen bg-[#FBFBFB] dark:bg-[#1D1D1D]">
-        <Text>{content.content}</Text>
+      <View className="w-[37.14vw] h-screen bg-[#FBFBFB] dark:bg-[#1D1D1D]">
+        <Pressable
+          className="ml-[2.271vw] mt-[5vh] w-[13.11vw] h-[5.785vh]"
+          onPress={() => handleBack()}>
+          <Text className="text-white text-[3.077vw]">{question?.title}</Text>
+        </Pressable>
       </View>
       <View className="flex-1 flex-col">
-        <View className="w-full h-[83.496vh] bg-[#FFFDF3] dark:bg-[#27292E]" />
-        <View className="flex-1 bg-[#E7E7E7] dark:bg-black" />
+        <View className="w-full h-[83.496vh] bg-[#FFFDF3] dark:bg-[#27292E]">
+          <TextInput
+            multiline={true}
+            numberOfLines={100}
+            value={code}
+            onChangeText={setCode}
+            autoCapitalize={'none'}
+            className="ml-[2.271vw] mt-[3.03vh] h-full w-[59vw] bg-[#FFFDF3] dark:bg-[#27292E] text-black dark:text-white text-base leading-8"
+          />
+        </View>
+        <View className="flex-1 bg-[#E7E7E7] dark:bg-black">
+          {testAccepted === JudgeStatus.AC && (
+            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[26.454vw] h-[7.324vh] items-center justify-between">
+              <ACSvg />
+              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
+                Great! Test Passed!
+              </Text>
+            </View>
+          )}
+          {testAccepted === JudgeStatus.REJ && (
+            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[32.454vw] h-[7.324vh] items-center justify-between">
+              <RejSvg />
+              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
+                Hmmm...Maybe try again?
+              </Text>
+            </View>
+          )}
+          {solutionAccepted === JudgeStatus.AC && (
+            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[32.454vw] h-[7.324vh] items-center justify-between">
+              <ACSvg />
+              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
+                Great! Solution Accepted!
+              </Text>
+            </View>
+          )}
+          {solutionAccepted === JudgeStatus.REJ && (
+            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[32.454vw] h-[7.324vh] items-center justify-between">
+              <RejSvg />
+              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
+                Hmmm...Maybe try again?
+              </Text>
+            </View>
+          )}
+          <Pressable
+            className="absolute ml-[45.18vw] mt-[2.63vh] w-[14vw] h-[4.2vh] bg-[#FFAA44] rounded-[20px] items-center justify-center"
+            onPress={() => handleSubmit()}>
+            <Text className="text-white text-[1.46vw] text-semibold">
+              Submit
+            </Text>
+          </Pressable>
+          <Pressable
+            className="absolute ml-[45.18vw] mt-[10.3vh] w-[14vw] h-[4.2vh] border-solid border-2 border-[#FFAA44] rounded-[20px] items-center justify-center"
+            onPress={() => handleTest()}>
+            <Text className="text-[#FFAA44] text-[1.46vw] text-semibold">
+              Test
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
