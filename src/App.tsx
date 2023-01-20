@@ -17,7 +17,6 @@ export const App: React.FC = () => {
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
-            animation: 'none',
           }}>
           <Stack.Screen name="entry" component={EntryPage} />
           <Stack.Screen name="login" component={LoginPage} />

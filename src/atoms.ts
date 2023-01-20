@@ -9,8 +9,3 @@ export const sessionState = atom({
   key: 'sessionState',
   default: '',
 });
-
-export const expireState = atom({
-  key: 'expireState',
-  default: '',
-});
