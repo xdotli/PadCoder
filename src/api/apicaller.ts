@@ -2,12 +2,11 @@ import axios from 'axios';
 import {GraphQLClient} from 'graphql-request';
 import {
   Credential,
+  EvalResult,
   GraphQLRequestOptions,
   HttpRequestOptions,
   ProblemDetail,
   ProblemsetQuestionList,
-  SubmissionResult,
-  TestResult,
   Urls,
 } from './interfaces';
 
@@ -21,6 +20,7 @@ class ApiCaller {
     this.credential = {session: '', csrftoken: ''};
     this.urls = {
       base: 'https://leetcode.com/',
+      proxy: 'https://padcoder.azurewebsites.net/api/',
       graphql: 'https://leetcode.com/graphql/',
     };
   }
@@ -110,8 +110,8 @@ class ApiCaller {
     });
   }
 
-  async getTestCases(titleSlug: string): Promise<string> {
-    return await this.GraphQLRequest({
+  async getTestCases(titleSlug: string): Promise<any[]> {
+    const res = await this.GraphQLRequest({
       query: `
       query consolePanelConfig($titleSlug: String!) {
         question(titleSlug: $titleSlug) {
@@ -122,36 +122,30 @@ class ApiCaller {
       variables: {
         titleSlug: titleSlug,
       },
-    }).then(res => {
-      return res.exampleTestcaseList;
     });
+    return res.question.exampleTestcaseList[0];
   }
 
   async testSolution(
     slug: string,
-    data_input: string,
+    data_input: any,
     lang: string,
     question_id: string,
     typed_code: string,
-  ): Promise<TestResult> {
-    return await this.HttpRequest({
+  ): Promise<EvalResult> {
+    const res = await this.HttpRequest({
       method: 'POST',
-      url: `problems/${slug}/interpret_solution/`,
+      url: `${this.urls.proxy}interpret_lc_solution`,
       body: {
         data_input: data_input,
+        title_slug: slug,
         lang: lang,
         question_id: question_id,
         typed_code: typed_code,
       },
-    }).then(async res => {
-      console.log(res.data);
-      return await this.HttpRequest({
-        method: 'GET',
-        url: `submissions/detail/${res.data.interpret_id}/check`,
-      }).then(ret => {
-        return ret.data;
-      });
     });
+
+    return res.data as EvalResult;
   }
 
   async submitSolution(
@@ -159,31 +153,32 @@ class ApiCaller {
     lang: string,
     question_id: string,
     typed_code: string,
-  ): Promise<SubmissionResult> {
-    return await this.HttpRequest({
+  ): Promise<string> {
+    const res = await this.HttpRequest({
       method: 'POST',
-      url: `problems/${slug}/submit/`,
+      url: `${this.urls.proxy}lc_submit`,
       body: {
+        title_slug: slug,
         lang: lang,
         question_id: question_id,
         typed_code: typed_code,
       },
-    }).then(async res => {
-      return await this.HttpRequest({
-        method: 'GET',
-        url: `submissions/detail/${res.data.submission_id}/check`,
-      }).then(ret => {
-        return ret.data;
-      });
+    });
+    return res.data.submission_id;
+  }
+
+  async getResult(interpret_id: string): Promise<any> {
+    return this.HttpRequest({
+      method: 'GET',
+      url: `${this.urls.base}submissions/detail/${interpret_id}/check`,
+    }).then(res => {
+      return res.data.status_code;
     });
   }
 
   private async HttpRequest(options: HttpRequestOptions) {
-    console.log(
-      `LEETCODE_SESSION=${this.credential.session}; csrftoken=${this.credential.csrftoken}`,
-    );
     return axios.request({
-      url: this.urls.base + options.url,
+      url: options.url,
       method: options.method,
       headers: {
         Cookie: `LEETCODE_SESSION=${this.credential.session};csrftoken=${this.credential.csrftoken}`,

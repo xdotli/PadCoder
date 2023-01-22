@@ -18,9 +18,9 @@ export const CodingPage: React.FC = () => {
   );
   const [code, setCode] = useState('');
   const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
-  const [solutionAccepted, setSolutionAccepted] = useState(
-    JudgeStatus.NOTSUBMITTED,
-  );
+  // const [solutionAccepted, setSolutionAccepted] = useState(
+  //   JudgeStatus.NOTSUBMITTED,
+  // );
 
   const handleBack = () => {
     navigator.navigate('main');
@@ -40,39 +40,69 @@ export const CodingPage: React.FC = () => {
   };
 
   const handleTest = async () => {
-    // const testcases = await ApiCaller.getInstance().getTestCases(
-    //   question.titleSlug,
-    // );
+    const testcases = await ApiCaller.getInstance().getTestCases(
+      question.titleSlug,
+    );
 
-    // try {
-    //   const res = await ApiCaller.getInstance().testSolution(
-    //     question.titleSlug,
-    //     '',
-    //     'python3',
-    //     '1',
-    //     code,
-    //   );
-    // } catch (err) {
-    //   console.log(err);
-    // }
-    setSolutionAccepted(JudgeStatus.NOTSUBMITTED);
-    setTestAccepted(JudgeStatus.AC);
+    try {
+      const res = await ApiCaller.getInstance().testSolution(
+        question.titleSlug,
+        testcases,
+        'python3',
+        '1',
+        code,
+      );
+
+      setTimeout(async () => {
+        const testResult: any = await ApiCaller.getInstance().getResult(
+          res.interpret_id as string,
+        );
+
+        setTestAccepted(JudgeStatus.NOTSUBMITTED);
+        // setSolutionAccepted(JudgeStatus.NOTSUBMITTED);
+        if (testResult) {
+          if (testResult === 10) {
+            setTestAccepted(JudgeStatus.AC);
+          } else {
+            setTestAccepted(JudgeStatus.REJ);
+          }
+        }
+      }, 500);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const handleSubmit = async () => {
-    // try {
-    //   const res = await ApiCaller.getInstance().submitSolution(
-    //     question.titleSlug,
-    //     'python3',
-    //     '1',
-    //     code,
-    //   );
-    // } catch (err) {
-    //   console.log(err);
-    // }
-    setTestAccepted(JudgeStatus.NOTSUBMITTED);
-    setSolutionAccepted(JudgeStatus.AC);
-  };
+  // const handleSubmit = async () => {
+  //   try {
+  //     const res = await ApiCaller.getInstance().submitSolution(
+  //       question.titleSlug,
+  //       'python3',
+  //       '1',
+  //       code,
+  //     );
+  //     setTestAccepted(JudgeStatus.NOTSUBMITTED);
+  //     setSolutionAccepted(JudgeStatus.NOTSUBMITTED);
+
+  //     setTimeout(async () => {
+  //       const testResult: any = await ApiCaller.getInstance().getResult(
+  //         res as string,
+  //       );
+
+  //       console.log(testResult);
+  //       if (testResult) {
+  //         if (testResult === 10) {
+  //           setSolutionAccepted(JudgeStatus.AC);
+  //         } else {
+  //           setSolutionAccepted(JudgeStatus.REJ);
+  //         }
+  //       }
+  //     }, 1500);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   useEffect(() => {
     getQuestionDetail();
   }, []);
@@ -114,31 +144,8 @@ export const CodingPage: React.FC = () => {
               </Text>
             </View>
           )}
-          {solutionAccepted === JudgeStatus.AC && (
-            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[32.454vw] h-[7.324vh] items-center justify-between">
-              <ACSvg />
-              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
-                Great! Solution Accepted!
-              </Text>
-            </View>
-          )}
-          {solutionAccepted === JudgeStatus.REJ && (
-            <View className="flex-row ml-[4.615vw] mt-[4.59vh] w-[32.454vw] h-[7.324vh] items-center justify-between">
-              <RejSvg />
-              <Text className="text-white text-[2.2vw] text-semibold leading-1 ">
-                Hmmm...Maybe try again?
-              </Text>
-            </View>
-          )}
           <Pressable
-            className="absolute ml-[45.18vw] mt-[2.63vh] w-[14vw] h-[4.2vh] bg-[#FFAA44] rounded-[20px] items-center justify-center"
-            onPress={() => handleSubmit()}>
-            <Text className="text-white text-[1.46vw] text-semibold">
-              Submit
-            </Text>
-          </Pressable>
-          <Pressable
-            className="absolute ml-[45.18vw] mt-[10.3vh] w-[14vw] h-[4.2vh] border-solid border-2 border-[#FFAA44] rounded-[20px] items-center justify-center"
+            className="absolute ml-[45.18vw] mt-[7.3vh] w-[14vw] h-[4.2vh] border-solid border-2 border-[#FFAA44] rounded-[20px] items-center justify-center"
             onPress={() => handleTest()}>
             <Text className="text-[#FFAA44] text-[1.46vw] text-semibold">
               Test

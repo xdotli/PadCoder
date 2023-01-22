@@ -19,6 +19,7 @@ interface Credential {
 
 interface Urls {
   base: string;
+  proxy: string;
   graphql: string;
 }
 
@@ -46,6 +47,11 @@ interface ProblemDetail {
   codeSnippets: CodeSnippet[];
 }
 
+interface EvalResult {
+  interpret_id?: string;
+  test_cases?: string;
+  submission_id?: string;
+}
 interface TestResult {
   status_code: number;
   lang: string;
@@ -119,4 +125,5 @@ export type {
   CodeSnippet,
   TestResult,
   SubmissionResult,
+  EvalResult,
 };
