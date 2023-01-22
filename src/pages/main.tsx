@@ -1,10 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import ApiCaller from '../api/apicaller';
 import {ProblemsetQuestionList} from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
+import {ListNode, ExpandType} from '../components/list-node';
 
 export const MainPage: React.FC = () => {
   const [questionData, setQuestionData] = useState<ProblemsetQuestionList>();
@@ -42,13 +44,20 @@ export const MainPage: React.FC = () => {
         <Text className="pl-[2.27vw] pt-[7.42vh] text-[3.08vw] font-semibold text-dark dark:text-white">
           PadCoder
         </Text>
-        <Pressable
-          className="absolute ml-[2.344vw] mt-[52.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
-          onPress={() => navigator.navigate('coding')}>
-          <Text className="pt-[0.6vh] text-[#FFAA44] text-[1.47vw] leading-tight">
-            Coding
-          </Text>
-        </Pressable>
+
+        <View className="flex flex-col">
+          <ListNode title="LeetCode" expandType={ExpandType.NODE} />
+
+          <Pressable
+            // className="absolute ml-[2.344vw] mt-[52.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
+            className="w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
+            onPress={() => navigator.navigate('coding')}>
+            <Text className="pt-[0.6vh] text-[#FFAA44] text-[1.47vw] leading-tight">
+              Coding
+            </Text>
+          </Pressable>
+        </View>
+
         <Pressable
           className="absolute ml-[2.344vw] mt-[92.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
           onPress={() => handleLogout()}>
