@@ -1,22 +1,87 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {ReactNode, useEffect, useState} from 'react';
+import {Animated, Pressable, ScrollView, Text, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
-import {Pressable, Text, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import ApiCaller from '../api/apicaller';
-import {ProblemsetQuestionList} from '../api/interfaces';
+import {ProblemsetQuestionList, Problem} from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
+import {MainScreenNavigationProp} from 'api/navigation-types';
+import Chevron from '../svg/chevron';
+
+interface TreeNodeProps {
+  label: string;
+  children: ReactNode;
+}
+
+const TreeNode = ({label, children}: TreeNodeProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const rotation = new Animated.Value(0);
+
+  useEffect(() => {
+    Animated.timing(rotation, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 30,
+      useNativeDriver: true,
+    }).start();
+  }, [isExpanded]);
+
+  const handleToggle = () => {
+    setIsExpanded(isExpanded => !isExpanded);
+  };
+
+  const rotationDeg = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '90deg'],
+  });
+
+  return (
+    <View>
+      <Pressable
+        onPress={handleToggle}
+        className="flex flex-row items-center px-4 py-2">
+        <Text className="grow text-xl">{label}</Text>
+        <Animated.View
+          style={{
+            transform: [{rotate: rotationDeg}],
+          }}>
+          <Chevron />
+        </Animated.View>
+      </Pressable>
+      {isExpanded && children && (
+        <View style={{paddingLeft: 40}}>{children}</View>
+      )}
+    </View>
+  );
+};
+
+interface QuestionNodeProps {
+  question: Problem;
+}
+
+const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
+  const navigator = useNavigation<MainScreenNavigationProp>();
+
+  const handlePress = () => {
+    navigator.navigate('coding', {
+      titleSlug: question.titleSlug,
+      frontendQuestionId: question.frontendQuestionId,
+    });
+  };
+
+  return (
+    <Pressable onPress={handlePress}>
+      <Text className="text-xl p-2">{`[${question.frontendQuestionId}] ${question.title}`}</Text>
+    </Pressable>
+  );
+};
 
 export const MainPage: React.FC = () => {
   const [questionData, setQuestionData] = useState<ProblemsetQuestionList>();
   const navigator: any = useNavigation();
 
   const fetchQuestions = async () => {
-    const questions = await ApiCaller.getInstance().getProblems(
-      '',
-      {difficulty: 'EASY'},
-      50,
-      0,
-    );
+    const questions = await ApiCaller.getInstance().getProblems('', {}, 50, 0);
 
     if (questions) {
       setQuestionData(questions);
@@ -42,13 +107,34 @@ export const MainPage: React.FC = () => {
         <Text className="pl-[2.27vw] pt-[7.42vh] text-[3.08vw] font-semibold text-dark dark:text-white">
           PadCoder
         </Text>
-        <Pressable
-          className="absolute ml-[2.344vw] mt-[52.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
-          onPress={() => navigator.navigate('coding')}>
-          <Text className="pt-[0.6vh] text-[#FFAA44] text-[1.47vw] leading-tight">
-            Coding
-          </Text>
-        </Pressable>
+
+        <ScrollView className="flex flex-col max-h-[75vh] p-6">
+          {/* <TreeView /> */}
+
+          <TreeNode label="LeetCode">
+            <TreeNode label="All">
+              {questionData?.questions.slice(0, 10).map(ele => (
+                <QuestionNode question={ele} />
+              ))}
+            </TreeNode>
+            <TreeNode label="Company">
+              <Text>Yeah</Text>
+            </TreeNode>
+
+            <TreeNode label="Difficulty">
+              <TreeNode label="Easy">
+                <Text>Yeah</Text>
+              </TreeNode>
+              <TreeNode label="Medium">
+                <Text>Yeah</Text>
+              </TreeNode>
+              <TreeNode label="Hard">
+                <Text>Yeah</Text>
+              </TreeNode>
+            </TreeNode>
+          </TreeNode>
+        </ScrollView>
+
         <Pressable
           className="absolute ml-[2.344vw] mt-[92.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
           onPress={() => handleLogout()}>

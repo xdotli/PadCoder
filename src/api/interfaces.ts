@@ -36,6 +36,7 @@ interface Problem {
   slug: string;
   topicTags: TopicTag[];
   judgeType: string;
+  titleSlug: string;
 }
 
 interface ProblemDetail {
