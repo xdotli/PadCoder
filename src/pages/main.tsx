@@ -8,6 +8,29 @@ import {ProblemsetQuestionList} from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
 import {ListNode, ExpandType} from '../components/list-node';
 
+const data = {
+  title: 'LeetCode',
+  children: [
+    {
+      title: 'Difficulty',
+      children: [
+        {
+          title: 'Easy',
+          children: []
+        },
+        {
+          title: 'Medium',
+          children: []
+        }
+      ]
+    },
+    {
+      title: 'Company',
+      children: []
+    }
+  ]
+}
+
 export const MainPage: React.FC = () => {
   const [questionData, setQuestionData] = useState<ProblemsetQuestionList>();
   const navigator: any = useNavigation();
@@ -46,7 +69,7 @@ export const MainPage: React.FC = () => {
         </Text>
 
         <View className="flex flex-col">
-          <ListNode title="LeetCode" expandType={ExpandType.NODE} />
+          <ListNode data={data} title={"leetcode"}/>
 
           <Pressable
             // className="absolute ml-[2.344vw] mt-[52.188vh] w-[10.33vw] h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"

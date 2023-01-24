@@ -1,29 +1,43 @@
-import React from 'react';
-import {Text, Pressable} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, Pressable} from 'react-native';
+
+import {ListLeaf} from './list-leaf';
 
 export enum ExpandType {
   LEAF,
   NODE,
 }
 
-interface ListNodeProps {
+export interface ListNode {
   title: string;
   expandType: ExpandType;
+  children: ListNode[] | ListLeaf []
 }
 
-const handleExpandChildren = (expandType: ExpandType) => {
-  console.log(expandType);
-};
+interface ListNodeProps {
+  title: string;
+  // expandType: ExpandType;
+  data: ListNode | ListLeaf;
+}
 
-export const ListNode = ({title, expandType}: ListNodeProps) => {
+
+
+export const ListNode = ({title, data}: ListNodeProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const _handlePress = () => {
+    setIsCollapsed(!isCollapsed);
+  }
+
+
   return (
-    <Pressable onPress={() => handleExpandChildren(expandType)}>
-      <Text>{title}</Text>
-      {['child', 'child2'].map(ele => (
-        <Pressable>
-          <Text>{ele}</Text>
-        </Pressable>
-      ))}
-    </Pressable>
+    <View>
+      <Pressable onPress={_handlePress}>
+        <Text>{title}</Text>
+        {!isCollapsed && data.children.map((child, index) => (
+          <ListNode title={data.title} key={index} data={child} />
+        ))}
+      </Pressable>
+    </View>
   );
 };
