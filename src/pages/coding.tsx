@@ -6,7 +6,6 @@ import {
   View,
   ScrollView,
   useWindowDimensions,
-  Appearance,
   useColorScheme,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -14,9 +13,9 @@ import {RouteProp} from '@react-navigation/core';
 
 import RenderHTML from 'react-native-render-html';
 
-import {RootStackParamList} from 'api/navigation-types';
+import {RootStackParamList} from '../api/navigation-types';
 import ApiCaller from '../api/apicaller';
-import {ProblemDetail} from 'api/interfaces';
+import {ProblemDetail} from '../api/interfaces';
 import ACSvg from '../svg/ac';
 import RejSvg from '../svg/rej';
 
@@ -26,7 +25,6 @@ export const CodingPage: React.FC = () => {
   const navigator: any = useNavigation();
   const route = useRoute<CodingRouteNavigationProp>();
   const titleSlug = route.params.titleSlug;
-  console.log(titleSlug);
 
   enum JudgeStatus {
     NOTSUBMITTED,
@@ -39,7 +37,6 @@ export const CodingPage: React.FC = () => {
   const [code, setCode] = useState('');
   const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
 
-  // logic for rendering html strings in the problem details part.
   const {width} = useWindowDimensions();
   const theme = useColorScheme();
   const tagStyles = {
@@ -137,7 +134,7 @@ export const CodingPage: React.FC = () => {
     <View className="flex flex-row w-screen h-screen">
       <View className="w-[37.14vw] h-screen bg-[#FBFBFB] dark:bg-[#1D1D1D]">
         <Pressable
-          className="ml-[2.271vw] mt-[5vh] w-[13.11vw] h-[5.785vh]"
+          className="ml-[2.271vw] mt-[5vh]"
           onPress={() => handleBack()}>
           <Text className="text-black dark:text-white text-[3.077vw]">
             {question?.title}

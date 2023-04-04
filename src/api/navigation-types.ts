@@ -6,7 +6,13 @@ export interface RootStackParamList extends ParamListBase {
   coding: {titleSlug: string, frontendQuestionId: string};
 }
 
+export type CodingRouteParams = {
+  titleSlug: string, 
+  frontendQuestionId: string
+}
+
 export type MainScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'main'>;
-export type CodingRouteNavigationProp = {params: {titleSlug: string, frontendQuestionId: string}};
+
+export type CodingRouteNavigationProp = {params: CodingRouteParams};
 
 
