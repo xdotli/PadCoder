@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  FlatList,
-  ListRenderItemInfo,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import {FlatList, Pressable, Text, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -71,8 +64,6 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
 
   const isExpanded = expandedCategoryId === category.id;
 
-  const [expanded, setExpanded] = React.useState(false);
-
   const filter =
     category.label === 'All'
       ? {}
@@ -80,16 +71,51 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
           difficulty: category.id.toUpperCase(),
         };
 
-  const fetchQuestions = async () => {
+  // const fetchQuestions = async () => {
+  //   const questions = await ApiCaller.getInstance().getProblems(
+  //     '',
+  //     filter,
+  //     10,
+  //     0,
+  //   );
+
+  //   if (questions) {
+  //     setQuestionData(questions);
+  //   }
+  // };
+
+  const [currentPage, setCurrentPage] = React.useState(0);
+
+  const fetchQuestions = async (page: number) => {
+    const offset = page * 10;
     const questions = await ApiCaller.getInstance().getProblems(
       '',
       filter,
       10,
-      0,
+      offset,
     );
 
     if (questions) {
-      setQuestionData(questions);
+      setQuestionData(prevData => {
+        const updatedQuestions = [
+          ...(prevData?.questions || []),
+          ...questions.questions,
+        ];
+        // Remove excess problems and keep only the most recent 20 problems
+        const slicedQuestions = updatedQuestions.slice(-20);
+        return {...questions, questions: slicedQuestions};
+      });
+      setCurrentPage(page);
+    }
+  };
+
+  const handleEndReached = () => {
+    fetchQuestions(currentPage + 1);
+  };
+
+  const handleRefresh = () => {
+    if (currentPage > 0) {
+      fetchQuestions(currentPage - 1);
     }
   };
 
@@ -99,7 +125,8 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
     } else {
       setExpandedCategoryId(category.id);
       if (!questionData) {
-        await fetchQuestions();
+        setCurrentPage(0);
+        await fetchQuestions(0);
       }
     }
   };
@@ -113,13 +140,15 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
         <Chevron expanded={isExpanded} />
       </Pressable>
       {isExpanded && (
-        <View>
-          <FlatList
-            data={questionData?.questions}
-            renderItem={({item}) => <QuestionNode question={item} />}
-            keyExtractor={(item, index) => item.frontendQuestionId.toString()}
-          />
-        </View>
+        <FlatList
+          data={questionData?.questions}
+          renderItem={({item}) => <QuestionNode question={item} />}
+          keyExtractor={(item, index) => item.frontendQuestionId.toString()}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5} // Adjust this value as needed
+          refreshing={false} // You can use a state variable to manage this if needed
+          onRefresh={handleRefresh}
+        />
       )}
     </View>
   );
@@ -147,7 +176,7 @@ const TreeView: React.FC<TreeViewProps> = ({provider}) => {
   return (
     <CategoryNodeContext.Provider
       value={{expandedCategoryId, setExpandedCategoryId}}>
-      <View className="flex flex-col max-h-[75vh]">
+      <View className="flex flex-col max-h-[80vh]">
         <Pressable
           className="flex flex-row items-center"
           onPress={() => {
