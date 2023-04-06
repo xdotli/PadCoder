@@ -172,13 +172,15 @@ const TreeView: React.FC<TreeViewProps> = ({provider}) => {
           <Chevron expanded={expanded} />
         </Pressable>
         {expanded &&
-          categoryData?.categories.map(category => (
-            <CategoryNode provider={provider} category={category} />
+          categoryData?.categories.map((category, index) => (
+            <CategoryNode key={index} provider={provider} category={category} />
           ))}
       </View>
     </CategoryNodeContext.Provider>
   );
 };
+
+const QuestionView: React.FC = () => {};
 
 export const MainPage: React.FC = () => {
   const navigator: any = useNavigation();
@@ -205,7 +207,6 @@ export const MainPage: React.FC = () => {
 
   React.useEffect(() => {
     fetchProviders();
-    console.log(providers?.providers);
   }, []);
 
   return (
