@@ -12,6 +12,7 @@ import {
   Category,
   Provider,
   ProviderList,
+  ProblemDetail,
 } from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
 import {
@@ -19,6 +20,9 @@ import {
   CodingRouteParams,
 } from '../api/navigation-types';
 import Chevron from '../svg/chevron';
+import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
+import {selectedQuestionAtom} from '../atoms';
+import {QuestionView} from '../components/QuestoinView';
 
 interface TreeViewProps {
   provider: Provider;
@@ -44,9 +48,17 @@ const CategoryNodeContext = React.createContext<CategoryNodeContext>({
 });
 
 const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
+  // const setSelectedQuestion = useSetRecoilState(selectedQuestionAtom);
+  const [selectedQuestion, setSelectedQuestion] =
+    useRecoilState(selectedQuestionAtom);
+
+  const handlePress = () => {
+    setSelectedQuestion(question.titleSlug);
+  };
+
   return (
     <View className="pl-8">
-      <Pressable>
+      <Pressable onPress={handlePress}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -180,12 +192,59 @@ const TreeView: React.FC<TreeViewProps> = ({provider}) => {
   );
 };
 
-const QuestionView: React.FC = () => {};
+const NoQuestionPage: React.FC = () => (
+  <View className="flex-1 bg-[#FFFDF3] dark:bg-[#27292E]">
+    <View className="flex flex-col w-[20.7vw] h-[20.02vh] ml-[25.5vw] mt-[40.72vh] justify-between items-center">
+      <TerminalSvg />
+      <Text className="text-[1.47vw] leading-tight text-[#B5B5B5] whitespace-nowrap">
+        Select a question to begin
+      </Text>
+      <Text className="mt-[-1.5vh] text-[1.47vw] leading-tight text-[#B5B5B5]">
+        Enjoy!
+      </Text>
+    </View>
+  </View>
+);
+
+const WithQuestionPage: React.FC<{questionDetail: ProblemDetail}> = ({
+  questionDetail,
+}) => {
+  const navigator = useNavigation<MainScreenNavigationProp>();
+  const handlePress = () => {
+    navigator.navigate('coding', {
+      titleSlug: questionDetail.titleSlug,
+    } as CodingRouteParams);
+  };
+
+  return (
+    <View className="flex flex-col h-screen w-[70.7vw] bg-[#FBFBFB] dark:bg-[#1D1D1D]">
+      <Pressable className="ml-[2.271vw] mt-[5vh]">
+        <Text className="text-black dark:text-white text-[3.077vw]">
+          {questionDetail?.title}
+        </Text>
+      </Pressable>
+      <QuestionView question={questionDetail} />
+      <View className="flex flex-row p-6 pr-12 border-1 h-[12vh] items-center">
+        <View className="grow"></View>
+        <Pressable
+          className="w-32 h-[4.199vh] rounded-[20px] border-[#FFAA44] border-2 justify-between items-center"
+          onPress={handlePress}>
+          <Text className="pt-[0.6vh] text-[#FFAA44] text-[1.47vw] leading-tight">
+            Coding
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
 
 export const MainPage: React.FC = () => {
   const navigator: any = useNavigation();
 
   const [providers, setProviders] = React.useState<ProviderList>();
+  const [selectedQuestion, setSelectedQuestion] =
+    useRecoilState(selectedQuestionAtom);
+  const [questionDetail, setQuestionDetail] = React.useState<ProblemDetail>();
 
   const handleLogout = async () => {
     await AsyncStorage.multiRemove([
@@ -205,9 +264,19 @@ export const MainPage: React.FC = () => {
     }
   };
 
+  const fetchQuestionDetail = async () => {
+    const questionDetail = await ApiCaller.getInstance().getProblemDetail(
+      selectedQuestion,
+    );
+    setQuestionDetail(questionDetail);
+  };
+
   React.useEffect(() => {
     fetchProviders();
-  }, []);
+    if (!!selectedQuestion) {
+      fetchQuestionDetail();
+    }
+  }, [selectedQuestion]);
 
   return (
     <View className="flex flex-row w-screen h-screen">
@@ -217,8 +286,8 @@ export const MainPage: React.FC = () => {
         </Text>
 
         <View className="flex flex-col max-h-[79vh] h-full p-6">
-          {providers?.providers.map(provider => (
-            <TreeView provider={provider} />
+          {providers?.providers.map((provider, index) => (
+            <TreeView key={index} provider={provider} />
           ))}
         </View>
 
@@ -230,17 +299,11 @@ export const MainPage: React.FC = () => {
           </Text>
         </Pressable>
       </View>
-      <View className="flex-1 bg-[#FFFDF3] dark:bg-[#27292E]">
-        <View className="flex flex-col w-[20.7vw] h-[20.02vh] ml-[25.5vw] mt-[40.72vh] justify-between items-center">
-          <TerminalSvg />
-          <Text className="text-[1.47vw] leading-tight text-[#B5B5B5] whitespace-nowrap">
-            Select a question to begin
-          </Text>
-          <Text className="mt-[-1.5vh] text-[1.47vw] leading-tight text-[#B5B5B5]">
-            Enjoy!
-          </Text>
-        </View>
-      </View>
+
+      {!selectedQuestion && !questionDetail && <NoQuestionPage />}
+      {!!selectedQuestion && questionDetail && (
+        <WithQuestionPage questionDetail={questionDetail} />
+      )}
     </View>
   );
 };

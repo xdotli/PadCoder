@@ -3,12 +3,11 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 export interface RootStackParamList extends ParamListBase {
   main: undefined;
-  coding: {titleSlug: string, frontendQuestionId: string};
+  coding: {titleSlug: string};
 }
 
 export type CodingRouteParams = {
   titleSlug: string, 
-  frontendQuestionId: string
 }
 
 export type MainScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'main'>;

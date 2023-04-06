@@ -4,20 +4,17 @@ import {
   Text,
   TextInput,
   View,
-  ScrollView,
   useWindowDimensions,
-  useColorScheme,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {RouteProp} from '@react-navigation/core';
-
-import RenderHTML from 'react-native-render-html';
 
 import {RootStackParamList} from '../api/navigation-types';
 import ApiCaller from '../api/apicaller';
 import {ProblemDetail} from '../api/interfaces';
 import ACSvg from '../svg/ac';
 import RejSvg from '../svg/rej';
+import {QuestionView} from '../components/QuestoinView';
 
 type CodingRouteNavigationProp = RouteProp<RootStackParamList, 'coding'>;
 
@@ -31,19 +28,11 @@ export const CodingPage: React.FC = () => {
     AC,
     REJ,
   }
-  const [question, setQuestion] = useState<ProblemDetail>(
-    null as unknown as ProblemDetail,
-  );
+  const [question, setQuestion] = useState<ProblemDetail>({
+    content: '',
+  } as unknown as ProblemDetail);
   const [code, setCode] = useState('');
   const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
-
-  const {width} = useWindowDimensions();
-  const theme = useColorScheme();
-  const tagStyles = {
-    body: {
-      color: theme === 'dark' ? 'white' : 'black',
-    },
-  };
 
   const handleBack = () => {
     navigator.navigate('main');
@@ -140,13 +129,7 @@ export const CodingPage: React.FC = () => {
             {question?.title}
           </Text>
         </Pressable>
-        <ScrollView className="ml-[2.271vw] mb-[8vh] mr-[2vw]">
-          <RenderHTML
-            tagsStyles={tagStyles}
-            contentWidth={width}
-            source={{html: question?.content}}
-          />
-        </ScrollView>
+        <QuestionView question={question} />
       </View>
       <View className="flex-1 flex-col">
         <View className="w-full h-[83.496vh] bg-[#FFFDF3] dark:bg-[#27292E]">
