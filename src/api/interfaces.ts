@@ -33,7 +33,7 @@ interface ProviderList {
 }
 
 interface Provider {
-  provider: string;
+  id: string;
   label: string;
 }
 
@@ -42,7 +42,8 @@ interface CategoryList {
 }
 
 interface Category {
-  category: string;
+  provider: Provider;
+  id: string;
   label: string;
 }
 

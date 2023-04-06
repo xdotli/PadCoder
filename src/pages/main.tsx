@@ -12,7 +12,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ApiCaller from '../api/apicaller';
 
-import {ProblemsetQuestionList, Problem} from '../api/interfaces';
+import {
+  ProblemsetQuestionList,
+  Problem,
+  CategoryList,
+  Category,
+  Provider,
+  ProviderList,
+} from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
 import {
   MainScreenNavigationProp,
@@ -21,23 +28,147 @@ import {
 import Chevron from '../svg/chevron';
 
 interface TreeViewProps {
-  provider: string;
+  provider: Provider;
 }
 
 interface CategoryProps {
-  provider: string;
-  category: string;
+  provider: Provider;
+  category: Category;
 }
 
 interface QuestionNodeProps {
   question: Problem;
 }
 
+interface CategoryNodeContext {
+  expandedCategoryId: string | null;
+  setExpandedCategoryId: (category: string | null) => void;
+}
+
+const CategoryNodeContext = React.createContext<CategoryNodeContext>({
+  expandedCategoryId: null,
+  setExpandedCategoryId: () => {},
+});
+
+const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
+  return (
+    <View className="pl-8">
+      <Pressable>
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          className="text-xl p-2">{`[${question.frontendQuestionId}] ${question.title}`}</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
+  const [questionData, setQuestionData] =
+    React.useState<ProblemsetQuestionList>();
+  const {expandedCategoryId, setExpandedCategoryId} =
+    React.useContext(CategoryNodeContext);
+
+  const isExpanded = expandedCategoryId === category.id;
+
+  const [expanded, setExpanded] = React.useState(false);
+
+  const filter =
+    category.label === 'All'
+      ? {}
+      : {
+          difficulty: category.id.toUpperCase(),
+        };
+
+  const fetchQuestions = async () => {
+    const questions = await ApiCaller.getInstance().getProblems(
+      '',
+      filter,
+      10,
+      0,
+    );
+
+    if (questions) {
+      setQuestionData(questions);
+    }
+  };
+
+  const handlePress = async () => {
+    if (isExpanded) {
+      setExpandedCategoryId(null);
+    } else {
+      setExpandedCategoryId(category.id);
+      if (!questionData) {
+        await fetchQuestions();
+      }
+    }
+  };
+
+  return (
+    <View className="pl-4 flex flex-col max-h-[50vh]">
+      <Pressable
+        className="flex flex-row items-center"
+        onPress={() => handlePress()}>
+        <Text className="grow text-xl p-2">{category.label}</Text>
+        <Chevron expanded={isExpanded} />
+      </Pressable>
+      {isExpanded && (
+        <View>
+          <FlatList
+            data={questionData?.questions}
+            renderItem={({item}) => <QuestionNode question={item} />}
+            keyExtractor={(item, index) => item.frontendQuestionId.toString()}
+          />
+        </View>
+      )}
+    </View>
+  );
+};
+
+const TreeView: React.FC<TreeViewProps> = ({provider}) => {
+  const [categoryData, setCategoryData] = React.useState<CategoryList>();
+  const [expanded, setExpanded] = React.useState(false);
+  const [expandedCategoryId, setExpandedCategoryId] = React.useState<
+    string | null
+  >(null);
+
+  const fetchCategories = async () => {
+    const categories = await ApiCaller.getInstance().getCategories(provider.id);
+
+    if (categories) {
+      setCategoryData(categories);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  return (
+    <CategoryNodeContext.Provider
+      value={{expandedCategoryId, setExpandedCategoryId}}>
+      <View className="flex flex-col max-h-[75vh]">
+        <Pressable
+          className="flex flex-row items-center"
+          onPress={() => {
+            setExpanded(!expanded);
+          }}>
+          <Text className="grow text-xl p-2">{provider.label}</Text>
+          <Chevron expanded={expanded} />
+        </Pressable>
+        {expanded &&
+          categoryData?.categories.map(category => (
+            <CategoryNode provider={provider} category={category} />
+          ))}
+      </View>
+    </CategoryNodeContext.Provider>
+  );
+};
+
 export const MainPage: React.FC = () => {
   const navigator: any = useNavigation();
 
-  const [questionData, setQuestionData] =
-    React.useState<ProblemsetQuestionList>();
+  const [providers, setProviders] = React.useState<ProviderList>();
 
   const handleLogout = async () => {
     await AsyncStorage.multiRemove([
@@ -49,17 +180,17 @@ export const MainPage: React.FC = () => {
     });
   };
 
-  const fetchQuestions = async () => {
-    const questions = await ApiCaller.getInstance().getProblems('', {}, 50, 0);
+  const fetchProviders = async () => {
+    const providers = await ApiCaller.getInstance().getProviders();
 
-    if (questions) {
-      setQuestionData(questions);
+    if (providers) {
+      setProviders(providers);
     }
   };
 
   React.useEffect(() => {
-    fetchQuestions();
-    console.log(questionData?.questions.slice(0, 2));
+    fetchProviders();
+    console.log(providers?.providers);
   }, []);
 
   return (
@@ -70,7 +201,9 @@ export const MainPage: React.FC = () => {
         </Text>
 
         <View className="flex flex-col max-h-[79vh] h-full p-6">
-          {/* <TreeView data={treeData_} /> */}
+          {providers?.providers.map(provider => (
+            <TreeView provider={provider} />
+          ))}
         </View>
 
         <Pressable

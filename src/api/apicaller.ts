@@ -41,16 +41,16 @@ class ApiCaller {
 
   async getProviders(): Promise<ProviderList> {
     return {providers: [
-      {provider: 'leetcode', label: 'LeetCode'},
+      {id: 'leetcode', label: 'LeetCode'},
     ]};
   }
 
   async getCategories(provider: string): Promise<CategoryList> {
     return {categories: [
-      {category: 'all', label: 'All'},
-      {category: 'easy', label: 'Easy'},
-      {category: 'medium', label: 'Medium'},
-      {category: 'hard', label: 'Hard'},
+      {provider: {id: 'leetcode', label: 'LeetCode'}, id: 'all', label: 'All'},
+      {provider: {id: 'leetcode', label: 'LeetCode'}, id: 'easy', label: 'Easy'},
+      {provider: {id: 'leetcode', label: 'LeetCode'}, id: 'medium', label: 'Medium'},
+      {provider: {id: 'leetcode', label: 'LeetCode'}, id: 'hard', label: 'Hard'},
     ]};
   }
 

@@ -8,15 +8,17 @@ interface ChevronProps {
 }
 
 const Chevron: React.FC<ChevronProps> = ({expanded}) => {
-  const rotation = new Animated.Value(0);
+  const [rotation] = React.useState(new Animated.Value(0));
   const {height, width} = useWindowDimensions();
 
   React.useEffect(() => {
-    Animated.timing(rotation, {
+    const animation = Animated.timing(rotation, {
       toValue: expanded ? 1 : 0,
       duration: 30,
       useNativeDriver: true,
-    }).start();
+    });
+
+    animation.start();
   }, [expanded]);
 
   const rotationDeg = rotation.interpolate({
