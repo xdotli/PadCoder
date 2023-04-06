@@ -71,19 +71,6 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
           difficulty: category.id.toUpperCase(),
         };
 
-  // const fetchQuestions = async () => {
-  //   const questions = await ApiCaller.getInstance().getProblems(
-  //     '',
-  //     filter,
-  //     10,
-  //     0,
-  //   );
-
-  //   if (questions) {
-  //     setQuestionData(questions);
-  //   }
-  // };
-
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const fetchQuestions = async (page: number) => {
@@ -101,8 +88,7 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
           ...(prevData?.questions || []),
           ...questions.questions,
         ];
-        // Remove excess problems and keep only the most recent 20 problems
-        const slicedQuestions = updatedQuestions.slice(-20);
+        const slicedQuestions = updatedQuestions.slice(-10);
         return {...questions, questions: slicedQuestions};
       });
       setCurrentPage(page);
