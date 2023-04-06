@@ -28,6 +28,24 @@ interface ProblemsetQuestionList {
   questions: Problem[];
 }
 
+interface ProviderList {
+  providers: Provider[];
+}
+
+interface Provider {
+  provider: string;
+  label: string;
+}
+
+interface CategoryList {
+  categories: Category[];
+}
+
+interface Category {
+  category: string;
+  label: string;
+}
+
 interface Problem {
   difficulty: string;
   paidOnly: boolean;
@@ -119,6 +137,10 @@ export type {
   GraphQLRequestOptions,
   Credential,
   Urls,
+  ProviderList,
+  CategoryList,
+  Provider,
+  Category,
   ProblemsetQuestionList,
   Problem,
   ProblemDetail,

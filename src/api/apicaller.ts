@@ -1,12 +1,14 @@
 import axios from 'axios';
 import {GraphQLClient} from 'graphql-request';
 import {
+  CategoryList,
   Credential,
   EvalResult,
   GraphQLRequestOptions,
   HttpRequestOptions,
   ProblemDetail,
   ProblemsetQuestionList,
+  ProviderList,
   Urls,
 } from './interfaces';
 
@@ -35,6 +37,21 @@ class ApiCaller {
     }
 
     return ApiCaller.instance;
+  }
+
+  async getProviders(): Promise<ProviderList> {
+    return {providers: [
+      {provider: 'leetcode', label: 'LeetCode'},
+    ]};
+  }
+
+  async getCategories(provider: string): Promise<CategoryList> {
+    return {categories: [
+      {category: 'all', label: 'All'},
+      {category: 'easy', label: 'Easy'},
+      {category: 'medium', label: 'Medium'},
+      {category: 'hard', label: 'Hard'},
+    ]};
   }
 
   async getProblems(
