@@ -28,17 +28,9 @@ interface ProblemsetQuestionList {
   questions: Problem[];
 }
 
-interface ProviderList {
-  providers: Provider[];
-}
-
 interface Provider {
   id: string;
   label: string;
-}
-
-interface CategoryList {
-  categories: Category[];
 }
 
 interface Category {
@@ -138,8 +130,6 @@ export type {
   GraphQLRequestOptions,
   Credential,
   Urls,
-  ProviderList,
-  CategoryList,
   Provider,
   Category,
   ProblemsetQuestionList,

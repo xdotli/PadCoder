@@ -39,7 +39,7 @@ export const EntryPage: React.FC = () => {
   });
 
   const handleGetStarted = () => {
-    navigator.navigate('main');
+    navigator.navigate('login');
   };
 
   return (

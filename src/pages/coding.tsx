@@ -30,7 +30,7 @@ export const CodingPage: React.FC = () => {
   }
   const [question, setQuestion] = useState<ProblemDetail>({
     content: '',
-  } as unknown as ProblemDetail);
+  } as ProblemDetail);
   const [code, setCode] = useState('');
   const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
 

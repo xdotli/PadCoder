@@ -8,10 +8,8 @@ import ApiCaller from '../api/apicaller';
 import {
   ProblemsetQuestionList,
   Problem,
-  CategoryList,
   Category,
   Provider,
-  ProviderList,
   ProblemDetail,
 } from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
@@ -20,7 +18,7 @@ import {
   CodingRouteParams,
 } from '../api/navigation-types';
 import Chevron from '../svg/chevron';
-import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
+import {useRecoilState} from 'recoil';
 import {selectedQuestionAtom} from '../atoms';
 import {QuestionView} from '../components/QuestoinView';
 
@@ -39,7 +37,7 @@ interface QuestionNodeProps {
 
 interface CategoryNodeContext {
   expandedCategoryId: string | null;
-  setExpandedCategoryId: (category: string | null) => void;
+  setExpandedCategoryId: (category: string) => void;
 }
 
 const CategoryNodeContext = React.createContext<CategoryNodeContext>({
@@ -48,7 +46,6 @@ const CategoryNodeContext = React.createContext<CategoryNodeContext>({
 });
 
 const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
-  // const setSelectedQuestion = useSetRecoilState(selectedQuestionAtom);
   const [selectedQuestion, setSelectedQuestion] =
     useRecoilState(selectedQuestionAtom);
 
@@ -119,7 +116,7 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
 
   const handlePress = async () => {
     if (isExpanded) {
-      setExpandedCategoryId(null);
+      setExpandedCategoryId('');
     } else {
       setExpandedCategoryId(category.id);
       if (!questionData) {
@@ -153,11 +150,9 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
 };
 
 const TreeView: React.FC<TreeViewProps> = ({provider}) => {
-  const [categoryData, setCategoryData] = React.useState<CategoryList>();
+  const [categoryData, setCategoryData] = React.useState<Category[]>();
   const [expanded, setExpanded] = React.useState(false);
-  const [expandedCategoryId, setExpandedCategoryId] = React.useState<
-    string | null
-  >(null);
+  const [expandedCategoryId, setExpandedCategoryId] = React.useState('');
 
   const fetchCategories = async () => {
     const categories = await ApiCaller.getInstance().getCategories(provider.id);
@@ -184,7 +179,7 @@ const TreeView: React.FC<TreeViewProps> = ({provider}) => {
           <Chevron expanded={expanded} />
         </Pressable>
         {expanded &&
-          categoryData?.categories.map((category, index) => (
+          categoryData?.map((category, index) => (
             <CategoryNode key={index} provider={provider} category={category} />
           ))}
       </View>
@@ -241,7 +236,7 @@ const WithQuestionPage: React.FC<{questionDetail: ProblemDetail}> = ({
 export const MainPage: React.FC = () => {
   const navigator: any = useNavigation();
 
-  const [providers, setProviders] = React.useState<ProviderList>();
+  const [providers, setProviders] = React.useState<Provider[]>();
   const [selectedQuestion, setSelectedQuestion] =
     useRecoilState(selectedQuestionAtom);
   const [questionDetail, setQuestionDetail] = React.useState<ProblemDetail>();
@@ -286,7 +281,7 @@ export const MainPage: React.FC = () => {
         </Text>
 
         <View className="flex flex-col max-h-[79vh] h-full p-6">
-          {providers?.providers.map((provider, index) => (
+          {providers?.map((provider, index) => (
             <TreeView key={index} provider={provider} />
           ))}
         </View>
