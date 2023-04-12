@@ -14,9 +14,10 @@ import {
 } from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
 import Chevron from '../svg/chevron';
-import {useRecoilState} from 'recoil';
+import {useRecoilState, useRecoilValue} from 'recoil';
 import {selectedQuestionAtom} from '../atoms';
 import {QuestionView} from '../components/QuestoinView';
+import TickSvg from '../svg/tick';
 
 interface TreeViewProps {
   provider: Provider;
@@ -29,6 +30,8 @@ interface CategoryProps {
 
 interface QuestionNodeProps {
   question: Problem;
+  selected: boolean;
+  completed?: boolean;
 }
 
 interface CategoryNodeContext {
@@ -41,7 +44,11 @@ const CategoryNodeContext = React.createContext<CategoryNodeContext>({
   setExpandedCategoryId: () => {},
 });
 
-const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
+const QuestionNode: React.FC<QuestionNodeProps> = ({
+  question,
+  selected,
+  completed = false,
+}) => {
   const [selectedQuestion, setSelectedQuestion] =
     useRecoilState(selectedQuestionAtom);
 
@@ -51,11 +58,18 @@ const QuestionNode: React.FC<QuestionNodeProps> = ({question}) => {
 
   return (
     <View className="pl-8">
-      <Pressable onPress={handlePress}>
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          className="text-xl p-2">{`[${question.frontendQuestionId}] ${question.title}`}</Text>
+      <Pressable
+        className={`rounded-[6px] ${selected ? 'bg-[#FFAA44]' : ''}`}
+        onPress={handlePress}>
+        <View className="flex flex-row items-center">
+          <TickSvg completed={true} />
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            className={`text-xl p-2 ${
+              selected ? 'text-white' : 'text-black'
+            }`}>{`[${question.frontendQuestionId}] ${question.title}`}</Text>
+        </View>
       </Pressable>
     </View>
   );
@@ -66,6 +80,7 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
     React.useState<ProblemsetQuestionList>();
   const {expandedCategoryId, setExpandedCategoryId} =
     React.useContext(CategoryNodeContext);
+  const selectedQuestion = useRecoilValue(selectedQuestionAtom);
 
   const isExpanded = expandedCategoryId === category.id;
 
@@ -133,7 +148,13 @@ const CategoryNode: React.FC<CategoryProps> = ({provider, category}) => {
       {isExpanded && (
         <FlatList
           data={questionData?.questions}
-          renderItem={({item}) => <QuestionNode question={item} />}
+          renderItem={({item}) => (
+            <QuestionNode
+              question={item}
+              selected={item.titleSlug === selectedQuestion}
+              completed={true}
+            />
+          )}
           keyExtractor={(item, index) => item.frontendQuestionId.toString()}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.5} // Adjust this value as needed
