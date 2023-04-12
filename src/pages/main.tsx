@@ -13,10 +13,6 @@ import {
   ProblemDetail,
 } from '../api/interfaces';
 import TerminalSvg from '../svg/terminal';
-import {
-  MainScreenNavigationProp,
-  CodingRouteParams,
-} from '../api/navigation-types';
 import Chevron from '../svg/chevron';
 import {useRecoilState} from 'recoil';
 import {selectedQuestionAtom} from '../atoms';
@@ -204,11 +200,9 @@ const NoQuestionPage: React.FC = () => (
 const WithQuestionPage: React.FC<{questionDetail: ProblemDetail}> = ({
   questionDetail,
 }) => {
-  const navigator = useNavigation<MainScreenNavigationProp>();
+  const navigator = useNavigation<any>();
   const handlePress = () => {
-    navigator.navigate('coding', {
-      titleSlug: questionDetail.titleSlug,
-    } as CodingRouteParams);
+    navigator.navigate('coding');
   };
 
   return (

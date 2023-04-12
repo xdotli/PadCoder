@@ -1,27 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Pressable,
-  Text,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {RouteProp} from '@react-navigation/core';
+import {Pressable, Text, TextInput, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
-import {RootStackParamList} from '../api/navigation-types';
 import ApiCaller from '../api/apicaller';
 import {ProblemDetail} from '../api/interfaces';
 import ACSvg from '../svg/ac';
 import RejSvg from '../svg/rej';
 import {QuestionView} from '../components/QuestoinView';
-
-type CodingRouteNavigationProp = RouteProp<RootStackParamList, 'coding'>;
+import {useRecoilValue} from 'recoil';
+import {selectedQuestionAtom} from '../atoms';
 
 export const CodingPage: React.FC = () => {
   const navigator: any = useNavigation();
-  const route = useRoute<CodingRouteNavigationProp>();
-  const titleSlug = route.params.titleSlug;
+  const titleSlug = useRecoilValue(selectedQuestionAtom);
 
   enum JudgeStatus {
     NOTSUBMITTED,
