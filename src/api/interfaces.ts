@@ -28,6 +28,17 @@ interface ProblemsetQuestionList {
   questions: Problem[];
 }
 
+interface Provider {
+  id: string;
+  label: string;
+}
+
+interface Category {
+  provider: Provider;
+  id: string;
+  label: string;
+}
+
 interface Problem {
   difficulty: string;
   paidOnly: boolean;
@@ -36,6 +47,7 @@ interface Problem {
   slug: string;
   topicTags: TopicTag[];
   judgeType: string;
+  titleSlug: string;
 }
 
 interface ProblemDetail {
@@ -118,6 +130,8 @@ export type {
   GraphQLRequestOptions,
   Credential,
   Urls,
+  Provider,
+  Category,
   ProblemsetQuestionList,
   Problem,
   ProblemDetail,
