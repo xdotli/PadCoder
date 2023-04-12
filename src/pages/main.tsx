@@ -206,7 +206,7 @@ const WithQuestionPage: React.FC<{questionDetail: ProblemDetail}> = ({
   };
 
   return (
-    <View className="flex flex-col h-screen w-[70.7vw] bg-[#FBFBFB] dark:bg-[#1D1D1D]">
+    <View className="flex flex-col h-screen w-[70.7vw] bg-[#FFFDF3] dark:bg-[#1D1D1D]">
       <Pressable className="ml-[2.271vw] mt-[5vh]">
         <Text className="text-black dark:text-white text-[3.077vw]">
           {questionDetail?.title}

@@ -13,7 +13,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({question}) => {
 
   const tagStyles = {
     body: {
-      color: theme === 'dark' ? 'white' : 'black',
+      color: theme === 'dark' ? '#FFFDF3' : 'black',
     },
   };
   return (
