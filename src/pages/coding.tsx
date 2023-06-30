@@ -1,43 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import {Pressable, Text, TextInput, View, ScrollView, useWindowDimensions,
-  Appearance, useColorScheme } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Pressable, Text, TextInput, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import RenderHTML from 'react-native-render-html';
 
 import ApiCaller from '../api/apicaller';
 import {ProblemDetail} from '../api/interfaces';
 import ACSvg from '../svg/ac';
 import RejSvg from '../svg/rej';
+import {QuestionView} from '../components/QuestoinView';
+import {useRecoilValue} from 'recoil';
+import {selectedQuestionAtom} from '../atoms';
 
 export const CodingPage: React.FC = () => {
   const navigator: any = useNavigation();
-  
+  const titleSlug = useRecoilValue(selectedQuestionAtom);
+
   enum JudgeStatus {
     NOTSUBMITTED,
     AC,
     REJ,
   }
-  const [question, setQuestion] = useState<ProblemDetail>(
-    null as unknown as ProblemDetail,
-  );
+  const [question, setQuestion] = useState<ProblemDetail>({
+    content: '',
+  } as ProblemDetail);
   const [code, setCode] = useState('');
   const [testAccepted, setTestAccepted] = useState(JudgeStatus.NOTSUBMITTED);
-
-  // logic for rendering html strings in the problem details part. 
-  const { width } = useWindowDimensions();
-  const theme = useColorScheme();
-  const tagStyles = {
-    body: {
-      color: theme === 'dark'? 'white' : 'black'
-    }
-  }
 
   const handleBack = () => {
     navigator.navigate('main');
   };
 
   const getQuestionDetail = async () => {
-    const data = await ApiCaller.getInstance().getProblemDetail('two-sum');
+    const data = await ApiCaller.getInstance().getProblemDetail(titleSlug);
 
     if (data) {
       setQuestion(data);
@@ -121,14 +114,13 @@ export const CodingPage: React.FC = () => {
     <View className="flex flex-row w-screen h-screen">
       <View className="w-[37.14vw] h-screen bg-[#FBFBFB] dark:bg-[#1D1D1D]">
         <Pressable
-          className="ml-[2.271vw] mt-[5vh] w-[13.11vw] h-[5.785vh]"
+          className="ml-[2.271vw] mt-[5vh]"
           onPress={() => handleBack()}>
-          <Text className="text-black dark:text-white text-[3.077vw]">{question?.title}</Text>
+          <Text className="text-black dark:text-white text-[3.077vw]">
+            {question?.title}
+          </Text>
         </Pressable>
-        <ScrollView
-          className='ml-[2.271vw] mb-[8vh] mr-[2vw]'>
-          <RenderHTML tagsStyles={tagStyles} contentWidth={width} source={{html: question?.content}} />
-        </ScrollView>
+        <QuestionView question={question} />
       </View>
       <View className="flex-1 flex-col">
         <View className="w-full h-[83.496vh] bg-[#FFFDF3] dark:bg-[#27292E]">
